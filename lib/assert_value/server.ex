@@ -65,7 +65,13 @@ defmodule AssertValue.Server do
   end
 
   def handle_cast({:flush_ex_unit_io}, state) do
-    contents = StringIO.flush(state.captured_ex_unit_io_pid)
+    contents =
+      try do
+        StringIO.flush(state.captured_ex_unit_io_pid)
+      catch
+        :exit, {:noproc, _} -> ""
+      end
+
     if contents != "", do: IO.write(contents)
     {:noreply, state}
   end
